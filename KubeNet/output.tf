@@ -6,10 +6,12 @@ output "internet_gateway_id" {
   description = "The Internet Gateway ID"
   value       = aws_internet_gateway.cluster-igw.id
 }
-output "public_subnet_1_ids" {
+
+output "public_subnet_1" {
   value = aws_subnet.pubsub-1.id
 }
-output "public_subnet_2_ids" {
+
+output "public_subnet_2" {
   value = aws_subnet.pubsub-2.id
 }
 
@@ -18,4 +20,8 @@ output "private_subnet_1" {
 }
 output "private_subnet_2" {
   value = aws_subnet.privsub-2.id
+}
+output "nat_gateway_id" {
+  description = "The NAT Gateway ID"
+  value       = aws_nat_gateway.nat-gw.id
 }
