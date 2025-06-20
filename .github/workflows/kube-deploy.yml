@@ -1,0 +1,118 @@
+name: Deploy and Clean EKS Infrastructure
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-vpc:
+    name: 🌐 Deploy VPC
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: KubeNet
+
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Configure AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: 🧱 Init VPC
+        run: terraform init
+
+      - name: 📋 Plan VPC
+        run: terraform plan -out=tfplan
+
+      - name: ✅ Apply VPC
+        run: terraform apply -auto-approve tfplan
+
+  deploy-eks:
+    name: ☸️ Deploy EKS
+    needs: deploy-vpc
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: EKS
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - uses: hashicorp/setup-terraform@v2
+      - name: 🧱 Init EKS
+        run: terraform init
+      - name: 📋 Plan EKS
+        run: terraform plan -var-file="eks.tfvars" -out=tfplan
+      - name: ✅ Apply EKS
+        run: terraform apply -auto-approve tfplan
+
+  verify-eks:
+    name: 🔍 Verify Cluster
+    needs: deploy-eks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: 🛠️ Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - name: 📡 Configure kubeconfig
+        run: aws eks update-kubeconfig --region eu-west-2 --name laredo-cluster
+      - name: 👀 Get Nodes
+        run: kubectl get nodes
+      - name: 📂 List Namespaces
+        run: kubectl get namespaces
+
+  # cleanup:
+  #   name: 🧹 Auto-Destroy After 10min
+  #   needs: verify-eks
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: cleanup_env
+  #   timeout-minutes: 15
+  #   steps:
+  #     - name: 💤 Wait Before Destroying
+  #       run: sleep 600  # 10 minutes
+
+  #     - name: ⬇️ Checkout Code
+  #       uses: actions/checkout@v3
+
+  #     - uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: eu-west-2
+
+  #     - name: ⚙️ Setup Terraform
+  #       uses: hashicorp/setup-terraform@v2
+
+  #     - name: 🔥 Destroy EKS
+  #       working-directory: EKS
+  #       run: |
+  #         terraform init
+  #         terraform destroy -auto-approve -var-file="eks.tfvars"
+
+  #     - name: 🔥 Destroy VPC
+  #       working-directory: KubeNet
+  #       run: |
+  #         terraform init
+  #         terraform destroy -auto-approve
+
