@@ -19,6 +19,7 @@ module "eks" {
   version         = "~> 20.0" # Use the latest major version
   cluster_name    = var.cluster_name
   cluster_version = "1.29"
+  create_cloudwatch_log_group = false
   vpc_id          = data.terraform_remote_state.vpc.outputs.vpc_id
   subnet_ids = concat(
   [data.terraform_remote_state.vpc.outputs.public_subnet_1],
