@@ -38,7 +38,8 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "kms:CreateAlias",
         "kms:DeleteAlias",
         "kms:ListAliases",
-        "iam:CreateOpenIDConnectProvider"
+        "iam:CreateOpenIDConnectProvider",
+        "iam:TagOpenIDConnectProvider"
       ],
       "Resource": "*"
     },
@@ -48,12 +49,19 @@ updated policy to allo the effective creation of eks clustyer and associated ser
       "Resource": "*",
       "Condition": {
         "StringEquals": {
-          "iam:AWSServiceName": "eks.amazonaws.com"
+          "iam:AWSServiceName": [
+            "eks.amazonaws.com",
+            "eks-nodegroup.amazonaws.com"
+          ]
         }
       }
     }
   ]
 }
+
+
+
+
 
 
 
