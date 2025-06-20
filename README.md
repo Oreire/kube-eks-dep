@@ -36,11 +36,15 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "iam:GetPolicyVersion",
         "iam:ListRolePolicies",
         "iam:ListAttachedRolePolicies",
+        "iam:ListPolicyVersions",
         "iam:TagRole",
         "logs:CreateLogGroup",
         "logs:PutRetentionPolicy",
         "logs:TagResource",
-        "logs:ListTagsForResource"
+        "logs:ListTagsForResource",
+        "kms:CreateKey",
+        "kms:EnableKey",
+        "kms:TagResource"
       ],
       "Resource": "*"
     }
