@@ -21,9 +21,10 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "iam:ListPolicyVersions",
         "iam:TagRole",
         "iam:PassRole",
-        "iam:CreateServiceLinkedRole",
         "eks:CreateCluster",
         "eks:DeleteCluster",
+        "eks:DescribeCluster",
+        "eks:ListClusters",
         "eks:TagResource",
         "eks:UntagResource",
         "logs:CreateLogGroup",
@@ -38,10 +39,19 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "kms:ListAliases"
       ],
       "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iam:CreateServiceLinkedRole",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:AWSServiceName": "eks.amazonaws.com"
+        }
+      }
     }
   ]
 }
-
 
 
 
