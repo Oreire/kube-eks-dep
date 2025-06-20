@@ -22,6 +22,7 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "iam:TagRole",
         "iam:PassRole",
         "iam:ListInstanceProfilesForRole",
+        "iam:DeleteRole",
         "eks:CreateCluster",
         "eks:DeleteCluster",
         "eks:DescribeCluster",
@@ -63,6 +64,8 @@ updated policy to allo the effective creation of eks clustyer and associated ser
     }
   ]
 }
+
+
 
 
 
