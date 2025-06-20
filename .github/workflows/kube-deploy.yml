@@ -30,7 +30,7 @@ jobs:
         run: terraform init
 
       - name: 📋 Plan VPC
-        run: terraform plan -out=tfplan
+        run: terraform plan -out=tfplan -var-file="kub.tfvars"
 
       - name: ✅ Apply VPC
         run: terraform apply -auto-approve tfplan
@@ -54,7 +54,7 @@ jobs:
       - name: 🧱 Init EKS
         run: terraform init
       - name: 📋 Plan EKS
-        run: terraform plan -var-file="eks.tfvars" -out=tfplan
+        run: terraform plan -out=tfplan
       - name: ✅ Apply EKS
         run: terraform apply -auto-approve tfplan
 
