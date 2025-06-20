@@ -25,6 +25,7 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "eks:DeleteCluster",
         "eks:DescribeCluster",
         "eks:ListClusters",
+        "eks:CreateNodegroup",
         "eks:TagResource",
         "eks:UntagResource",
         "logs:CreateLogGroup",
@@ -36,7 +37,8 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "kms:TagResource",
         "kms:CreateAlias",
         "kms:DeleteAlias",
-        "kms:ListAliases"
+        "kms:ListAliases",
+        "iam:CreateOpenIDConnectProvider"
       ],
       "Resource": "*"
     },
@@ -52,6 +54,8 @@ updated policy to allo the effective creation of eks clustyer and associated ser
     }
   ]
 }
+
+
 
 
 
