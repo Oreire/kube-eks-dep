@@ -21,11 +21,12 @@ module "eks" {
   cluster_version = "1.29"
   vpc_id          = data.terraform_remote_state.vpc.outputs.vpc_id
   subnet_ids = concat(
-    data.terraform_remote_state.vpc.outputs.public_subnet_1,
-    data.terraform_remote_state.vpc.outputs.public_subnet_2,
-    data.terraform_remote_state.vpc.outputs.private_subnet_1,
-    data.terraform_remote_state.vpc.outputs.private_subnet_2
-  )
+  [data.terraform_remote_state.vpc.outputs.public_subnet_1],
+  [data.terraform_remote_state.vpc.outputs.public_subnet_2],
+  [data.terraform_remote_state.vpc.outputs.private_subnet_1],
+  [data.terraform_remote_state.vpc.outputs.private_subnet_2]
+)
+
 
   eks_managed_node_groups = {
     default = {
