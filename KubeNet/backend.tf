@@ -1,4 +1,5 @@
 # S3 Backend to store state file for VPC and associated infastructure
+# back end already created manually on aws
 
 terraform {
   backend "s3" {
