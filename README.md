@@ -12,25 +12,6 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "iam:AttachRolePolicy",
         "iam:PutRolePolicy",
         "iam:CreatePolicy",
-        "logs:CreateLogGroup",
-        "logs:PutRetentionPolicy",
-        "logs:TagResource"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iam:CreateRole",
-        "iam:AttachRolePolicy",
-        "iam:PutRolePolicy",
-        "iam:CreatePolicy",
         "iam:DeletePolicy",
         "iam:GetRole",
         "iam:GetPolicy",
@@ -46,10 +27,19 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "kms:CreateKey",
         "kms:EnableKey",
         "kms:TagResource",
+        "eks:CreateCluster",
+        "eks:DeleteCluster",
+        "kms:DeleteAlias",
         "kms:CreateAlias"
       ],
       "Resource": "*"
     }
   ]
 }
+
+
+"eks:CreateCluster",
+"kms:DeleteAlias",
+"kms:DeleteAlias"
+
 

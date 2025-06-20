@@ -3,8 +3,8 @@ resource "aws_cloudwatch_log_group" "eks_cluster" {
   retention_in_days = 7
 
   lifecycle {
-    create_before_destroy = true
     prevent_destroy       = false
+    create_before_destroy = true
     ignore_changes        = [tags]
   }
 
@@ -14,3 +14,18 @@ resource "aws_cloudwatch_log_group" "eks_cluster" {
   }
 }
 
+# resource "aws_cloudwatch_log_group" "eks_node_group" {
+#   name              = "/aws/eks/laredo-cluster/nodegroup"
+#   retention_in_days = 7
+
+#   lifecycle {
+#     prevent_destroy       = false
+#     create_before_destroy = true
+#     ignore_changes        = [tags]
+#   }
+
+#   tags = {
+#     Name        = "eks-nodegroup-logs"
+#     Environment = "dev"
+#   }
+# }
