@@ -21,6 +21,7 @@ updated policy to allo the effective creation of eks clustyer and associated ser
         "iam:ListPolicyVersions",
         "iam:TagRole",
         "iam:PassRole",
+        "iam:CreateServiceLinkedRole",
         "eks:CreateCluster",
         "eks:DeleteCluster",
         "eks:TagResource",
@@ -40,6 +41,8 @@ updated policy to allo the effective creation of eks clustyer and associated ser
     }
   ]
 }
+
+
 
 
 
