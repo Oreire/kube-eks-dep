@@ -85,45 +85,42 @@ updated policy to allo the effective creation of eks clustyer and associated ser
 }
 
 
-Web Deply Workflow
-name: 🚀 Deploy to EKS
+deploy-app:
+  name: 🚀 Deploy Application
+  needs: deploy-eks
+  runs-on: ubuntu-latest
+  defaults:
+    run:
+      working-directory: WEB
+  env:
+    AWS_REGION: eu-west-2
+    CLUSTER_NAME: laredo-cluster  # Update if different
 
-on:
-  push:
-    branches: [main]
+  steps:
+    - name: 🧾 Checkout code
+      uses: actions/checkout@v3
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    - name: 🔐 Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
-    env:
-      AWS_REGION: eu-west-2
-      CLUSTER_NAME: laredo-cluster  # Update if different
+    - name: 🛠️ Install kubectl
+      run: |
+        KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
+        curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+        chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 
-    steps:
-      - name: 🧾 Checkout code
-        uses: actions/checkout@v3
+    - name: 📡 Update kubeconfig
+      run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
-      - name: 🔐 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+    - name: 🚀 Apply Kubernetes manifests
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
 
-      - name: 🛠️ Install kubectl
-        run: |
-          KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
-          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-
-      - name: 📡 Update kubeconfig
-        run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-
-      - name: 🚀 Apply Kubernetes manifests
-        run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
 
 
 nodgroup policy
