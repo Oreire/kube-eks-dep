@@ -99,7 +99,7 @@ jobs:
 
   # deploy-app:
   #   name: 🚀 Deploy Application
-  #   needs: verify-eks
+  #   needs: deploy-eks
   #   runs-on: ubuntu-latest
   #   defaults:
   #     run:
