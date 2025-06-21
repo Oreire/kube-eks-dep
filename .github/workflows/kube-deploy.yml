@@ -70,22 +70,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - name: 🛠️ Install kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-      - uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
-      - name: 📡 Configure kubeconfig
-        run: aws eks update-kubeconfig --region eu-west-2 --name laredo-cluster
-      - name: 👀 Get Nodes
-        run: kubectl get nodes
-      - name: 📂 List Namespaces
-        run: kubectl get namespaces
+    - uses: actions/checkout@v3
+
+    - name: 🛠️ Install kubectl
+      run: |
+        KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
+        curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+        chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+
+    - name: 🔐 Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-2
+
+    - name: 📡 Configure kubeconfig
+      run: aws eks update-kubeconfig --region eu-west-2 --name laredo-cluster
+
+    - name: 👀 Get Nodes
+      run: kubectl get nodes
+
+    - name: 📂 List Namespaces
+      run: kubectl get namespaces
+
+
 
   # deploy-app:
   #   name: 🚀 Deploy Application
