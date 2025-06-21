@@ -74,9 +74,10 @@ jobs:
 
     - name: 🛠️ Install kubectl
       run: |
-        KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
-        curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-        chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+       KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
+       curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+       chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+
 
     - name: 🔐 Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
