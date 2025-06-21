@@ -60,7 +60,7 @@ jobs:
 
   # deploy-app:
   deploy-app:
-    name: 🚀 Deploy Application
+    name: 🚀 Deploy Web Application
     needs: deploy-eks
     runs-on: ubuntu-latest
     defaults:
