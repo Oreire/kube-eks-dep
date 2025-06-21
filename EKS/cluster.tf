@@ -33,7 +33,7 @@ module "eks" {
     laredo-nodes = {
       instance_types   = ["t2.micro"]
       min_size         = 3
-      desired_capacity = 4
+      desired_capacity = 3
       max_size         = 6
       
       # Required tags for autoscaler
