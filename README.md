@@ -65,8 +65,76 @@ updated policy to allo the effective creation of eks clustyer and associated ser
   ]
 }
 
+{
+  "Effect": "Allow",
+  "Action": [
+    "ecr:GetAuthorizationToken",
+    "ecr:BatchCheckLayerAvailability",
+    "ecr:InitiateLayerUpload",
+    "ecr:UploadLayerPart",
+    "ecr:CompleteLayerUpload",
+    "ecr:PutImage",
+    "ecr:BatchGetImage",
+    "ecr:CreateRepository",
+    "ecr:DeleteRepository",
+    "ecr:DescribeRepositories",
+    "ecr:ListImages",
+    "ecr:BatchDeleteImage"
+  ],
+  "Resource": "*"
+}
 
 
+
+
+
+
+
+PUsh Image to AWS ECR
+Perfect, Ayomide. Since your local Docker image is named `ghs-nginx-app46` and your AWS account ID is `160002177953`, here’s exactly what you need to do to push it to Amazon ECR:
+
+---
+
+### 🧭 Step-by-Step: Push `ghs-nginx-app46` to ECR
+
+#### 1. **Authenticate Docker to ECR**
+```bash
+aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 160002177953.dkr.ecr.eu-west-2.amazonaws.com
+```
+
+---
+
+#### 2. **Create the ECR Repository (if not already created)**
+```bash
+aws ecr create-repository --repository-name ghs-nginx-app46 --region eu-west-2
+```
+
+---
+
+#### 3. **Tag Your Local Image**
+```bash
+docker tag ghs-nginx-app46:latest 160002177953.dkr.ecr.eu-west-2.amazonaws.com/ghs-nginx-app46:latest
+```
+
+---
+
+#### 4. **Push the Image to ECR**
+```bash
+docker push 160002177953.dkr.ecr.eu-west-2.amazonaws.com/ghs-nginx-app46:latest
+```
+
+---
+
+Once that’s done, your image will be available in ECR and ready to be referenced in your Kubernetes manifests or Helm charts.
+
+Want me to help you patch your `deployment.yaml` to use this image, or automate this entire flow in GitHub Actions? You're just a few keystrokes away from full GitOps glory.
+
+
+aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 160002177953.dkr.ecr.eu-west-2.amazonaws.com
+
+
+docker tag ghs-nginx-app46 160002177953.dkr.ecr.eu-west-2.amazonaws.com/ghs-nginx-app46
+docker push 160002177953.dkr.ecr.eu-west-2.amazonaws.com/ghs-nginx-app46
 
 
 
