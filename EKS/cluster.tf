@@ -30,12 +30,12 @@ module "eks" {
 
 
   eks_managed_node_groups = {
-    default = {
+    laredo-nodes = {
       instance_types   = ["t2.micro"]
       desired_capacity = 4
       min_size         = 3
       max_size         = 6
-
+      
       # Required tags for autoscaler
       tags = {
         "k8s.io/cluster-autoscaler/enabled"             = "true"
