@@ -126,6 +126,23 @@ jobs:
           kubectl apply -f k8s/service.yaml
 
 
+nodgroup policy
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "eks:UpdateNodegroupConfig",
+        "eks:DescribeNodegroup",
+        "eks:ListNodegroups",
+        "eks:DescribeUpdate"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+
 
 
 
