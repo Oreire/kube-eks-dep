@@ -15,7 +15,7 @@ variable "cluster_version" {
 
 variable "desired_size" {
   type    = number
-  default = 2
+  default = 3
 }
 
 variable "min_size" {
