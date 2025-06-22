@@ -1,6 +1,8 @@
 # kube-eks-dep
 Deployment of Containerized Web Application on AWS EKS Using Terraform and GitHub Actions
-updated policy to allow the effective creation of eks clustyer and associated services:
+
+
+Updated policy to allow the effective creation of eks clustyer and associated services:
 
 {
   "Version": "2012-10-17",
