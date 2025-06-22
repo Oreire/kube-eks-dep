@@ -180,33 +180,3 @@ jobs:
           terraform init
           terraform destroy -auto-approve
 
-# Uncomment the following section if you want to include a manual clean-up job
-
-  # clean-up:
-  #  name: 🧹 Clean Up All Resources
-  #  runs-on: ubuntu-latest
-  #  needs: [deploy-eks, verify-eks]
-
-  #  steps:
-  #   - uses: actions/checkout@v3
-
-  #   - uses: aws-actions/configure-aws-credentials@v2
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       aws-region: eu-west-2
-
-  #   - uses: hashicorp/setup-terraform@v2
-
-  #   - name: ⏳ Wait 5 minutes before cleanup
-  #     run: sleep 300
-
-  #   - name: 🧱 Init Terraform
-  #     run: terraform init
-
-  #   - name: 📋 Plan Destroy Everything
-  #     run: terraform plan -destroy -out=tfplan
-
-  #   - name: ✅ Apply Full Destroy
-  #     run: terraform apply -auto-approve tfplan
-
