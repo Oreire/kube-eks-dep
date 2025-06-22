@@ -88,7 +88,7 @@ resource "aws_eks_node_group" "this" {
     max_size     = var.max_size
   }
 
-  instance_types = ["t3.medium"]
+  instance_types = ["t3.small"]
   ami_type       = "AL2_x86_64"
   disk_size      = 20
 
