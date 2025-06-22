@@ -1,13 +1,14 @@
-# variables.tf
-
+# variables declaration for EKS Cluster
 variable "min_size" {
-  description = "Minimum number of nodes in the node group"
+  description = "Minimum number of nodes"
   type        = number
+  default     = 2
 }
 
 variable "desired_capacity" {
-  description = "Desired number of nodes in the node group"
+  description = "Desired number of nodes"
   type        = number
+  default     = 3
 
   validation {
     condition     = var.desired_capacity >= var.min_size
@@ -16,12 +17,21 @@ variable "desired_capacity" {
 }
 
 variable "max_size" {
-  description = "Maximum number of nodes in the node group"
+  description = "Maximum number of nodes"
   type        = number
+  default     = 5
 
   validation {
     condition     = var.max_size >= var.desired_capacity
     error_message = "max_size must be greater than or equal to desired_capacity."
   }
+}
+
+
+
+variable "cluster_name" {
+  description = "The name of the EKS cluster"
+  type        = string
+  default     = "laredo-cluster"
 }
 
