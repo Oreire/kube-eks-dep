@@ -54,7 +54,7 @@ jobs:
       - name: 🧱 Init EKS
         run: terraform init
       - name: 📋 Plan EKS
-        run: terraform plan -out=tfplan
+        run: terraform plan -out=tfplan -var-file=eks.tfvars
       - name: ✅ Apply EKS
         run: terraform apply -auto-approve tfplan
 

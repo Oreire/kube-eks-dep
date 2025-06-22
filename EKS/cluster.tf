@@ -32,9 +32,9 @@ module "eks" {
   eks_managed_node_groups = {
     laredo-nodes = {
       instance_types   = ["t2.micro"]
-      min_size         = 3
-      desired_capacity = 4
-      max_size         = 6
+      min_size         = var.min_size
+      desired_capacity = var.desired_capacity
+      max_size         = var.max_size
       
       # Required tags for autoscaler
       tags = {
