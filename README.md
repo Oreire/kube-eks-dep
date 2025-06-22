@@ -13,3 +13,4 @@ To support cost-effective, short-lived test environments, I implemented a condit
 This project demonstrates proficiency in cloud-native tooling and DevOps principles, highlighting my expertise in AWS IAM, Terraform-based infrastructure-as-code, Kubernetes deployment pipelines, and GitHub Actions for CI/CD automation—all wrapped in a secure, observable, and declarative workflow.
 
 
+**LoadBalancer Endpoint for Web Application Access is available at:** http://a112b036067094434803b3a363dee8fd-848965654.eu-west-2.elb.amazonaws.com
