@@ -3,7 +3,13 @@ name: Deploy and Clean EKS Infrastructure
 on:
   push:
     branches: [main]
-
+  workflow_dispatch:
+    inputs:
+      auto_destroy:
+        description: 'Destroy Infra? (true/false)'
+        required: true
+        default: 'false'
+        
 jobs:
   deploy-vpc:
     name: 🌐 Deploy VPC
@@ -116,10 +122,16 @@ jobs:
       - name: ✅ Verify Service Exposure
         run: kubectl get svc ghs-service -n coweb-ns
 
+      - name: 🌐 Print LoadBalancer endpoint
+        run: |
+          kubectl get svc ghs-service -n coweb-ns -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"
+          echo "LoadBalancer endpoint is available at: http://$(kubectl get svc ghs-service -n coweb-ns -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")"
+
       - name: ✅ Verify rollout
         run: kubectl rollout status deployment/ghs-web -n coweb-ns
 
-  teardown:
+  teardown-infra:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.auto_destroy == 'true'
     name: 🧹 Teardown Infra (auto after delay)
     needs: deploy-app
     runs-on: ubuntu-latest
@@ -151,6 +163,7 @@ jobs:
           cd ../KubeNet
           terraform init
           terraform destroy -auto-approve
+          
 # Uncomment the following section if you want to include a manual clean-up job
 
   # clean-up:
