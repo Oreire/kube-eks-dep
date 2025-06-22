@@ -5,14 +5,14 @@ variable "min_size" {
   default     = 2
 }
 
-variable "desired_capacity" {
+variable "desired_size" {
   description = "Desired number of nodes"
   type        = number
   default     = 3
 
   validation {
-    condition     = var.desired_capacity >= var.min_size
-    error_message = "desired_capacity must be greater than or equal to min_size."
+    condition     = var.desired_size >= var.min_size
+    error_message = "desired_size must be greater than or equal to min_size."
   }
 }
 
@@ -22,8 +22,8 @@ variable "max_size" {
   default     = 5
 
   validation {
-    condition     = var.max_size >= var.desired_capacity
-    error_message = "max_size must be greater than or equal to desired_capacity."
+    condition     = var.max_size >= var.desired_size
+    error_message = "max_size must be greater than or equal to desired_size."
   }
 }
 
