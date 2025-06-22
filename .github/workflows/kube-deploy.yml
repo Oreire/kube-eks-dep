@@ -126,6 +126,18 @@ jobs:
       - name: ✅ Verify Service Exposure
         run: kubectl get svc ghs-service -n coweb-ns
 
+      - name: 🕐 Wait for LoadBalancer hostname
+        run: |
+          for i in {1..20}; do
+            HOSTNAME=$(kubectl get svc ghs-service -n coweb-ns -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+            if [ -n "$HOSTNAME" ]; then
+              echo "LoadBalancer endpoint is available at: http://$HOSTNAME"
+              break
+            fi
+            echo "Waiting for LoadBalancer... ($i/20)"
+            sleep 10
+          done
+
       - name: 🌐 Print LoadBalancer endpoint
         run: |
           kubectl get svc ghs-service -n coweb-ns -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"
