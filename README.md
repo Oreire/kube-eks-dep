@@ -379,4 +379,4 @@ Then add this new job at the bottom of your workflow file:
 > This ensures both `eks-cluster` and `KubeNet` stacks are torn down cleanly—when you want, and only when you ask for it.
 
 Let me know if you'd like a confirmation prompt via environment variable or GitHub input form, or maybe turn this into a scheduled cleanup for ephemeral environments.
-xxxkkfffgggghhhhhlllllpppp
+xxxkkfffgggghhhhhlllllppppmmmmm
