@@ -163,7 +163,7 @@ jobs:
           cd ../KubeNet
           terraform init
           terraform destroy -auto-approve
-          
+
 # Uncomment the following section if you want to include a manual clean-up job
 
   # clean-up:
