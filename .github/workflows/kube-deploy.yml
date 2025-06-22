@@ -84,6 +84,8 @@ jobs:
     env:
       AWS_REGION: eu-west-2
       CLUSTER_NAME: laredo-cluster  # Update if different
+      KUBECTL_VERSION: v1.30.1
+
 
     steps:
       - name: 🧾 Checkout code
