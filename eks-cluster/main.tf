@@ -13,18 +13,18 @@ data "terraform_remote_state" "vpc" {
 }
 
 # IAM role for the EKS control plane
-resource "aws_iam_role" "eks_cluster" {
-  name = "eks-cluster-role"
+# resource "aws_iam_role" "eks_cluster" {
+#   name = "eks-cluster-role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = { Service = "eks.amazonaws.com" },
-      Action    = "sts:AssumeRole"
-    }]
-  })
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [{
+#       Effect = "Allow",
+#       Principal = { Service = "eks.amazonaws.com" },
+#       Action    = "sts:AssumeRole"
+#     }]
+#   })
+# }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   role       = aws_iam_role.eks_cluster.name
@@ -48,18 +48,18 @@ resource "aws_eks_cluster" "this" {
 }
 
 # IAM role for worker nodes
-resource "aws_iam_role" "eks_node" {
-  name = "eks-node-role"
+# resource "aws_iam_role" "eks_node" {
+#   name = "eks-node-role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = { Service = "ec2.amazonaws.com" },
-      Action    = "sts:AssumeRole"
-    }]
-  })
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [{
+#       Effect = "Allow",
+#       Principal = { Service = "ec2.amazonaws.com" },
+#       Action    = "sts:AssumeRole"
+#     }]
+#   })
+# }
 
 resource "aws_iam_role_policy_attachment" "eks_node_policies" {
   for_each = toset([
