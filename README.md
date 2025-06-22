@@ -259,3 +259,123 @@ Would you like to:
 - Or go full GitOps and prep this for a PR into your infra repo?
 
 Wherever you're headed, I’m ready to blueprint it with you.
+
+## New Deploymnet without eks modules:
+
+Ayomide, this workflow is looking excellent—clear logic, sound Terraform sequencing, and tight Kubernetes post-deploy checks. Here’s a thorough validation and a couple of pro tune-ups to make it even more bulletproof:
+
+---
+
+### ✅ Syntax and Structure: Solid
+- All YAML keys, nesting, and indentation are valid.
+- Each job has its own working directory and isolated AWS + Terraform setup—perfect for parallel workspace logic.
+- `needs:` dependencies are used correctly to enforce VPC → EKS → App flow.
+- `kubectl` commands follow `aws eks update-kubeconfig`, so context is correctly initialized before usage.
+
+---
+
+### 🔍 Suggested Enhancements
+
+1. **Add `workflow_dispatch` trigger** so the workflow can also be run manually from the GitHub UI:
+
+   ```yaml
+   on:
+     push:
+       branches: [main]
+     workflow_dispatch:
+   ```
+
+2. **Add a retry loop for node readiness (optional but resilient)**  
+   EKS node registration can be slightly delayed. You could swap this:
+
+   ```yaml
+   - name: ✅ Confirm nodes are ready
+     run: kubectl get nodes --no-headers | grep -c ' Ready'
+   ```
+
+   for:
+
+   ```yaml
+   - name: ✅ Wait for node readiness
+     run: |
+       for i in {1..10}; do
+         ready=$(kubectl get nodes --no-headers | grep -c ' Ready')
+         [ "$ready" -ge 1 ] && echo "✅ Nodes Ready" && exit 0
+         echo "⏳ Waiting for nodes..."
+         sleep 15
+       done
+       echo "❌ Nodes not ready in time" && exit 1
+   ```
+
+3. **Smoke-test service endpoint** (if it's exposed as LoadBalancer):
+
+   ```yaml
+   - name: 🌐 Smoke test service endpoint
+     run: |
+       svc_ip=$(kubectl get svc ghs-service -n coweb-ns -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+       echo "⏳ Waiting for service IP: $svc_ip"
+       for i in {1..10}; do
+         curl -s --fail http://$svc_ip && echo "✅ App is reachable" && exit 0
+         echo "Retrying..."
+         sleep 10
+       done
+       echo "❌ App endpoint not responding" && exit 1
+   ```
+
+---
+
+Want me to append a teardown job to this workflow for `workflow_dispatch`, or perhaps set up dynamic environment names using matrix strategy for dev/stage/prod?
+You’re building this pipeline like a pro.
+
+Brilliant! Let’s add a teardown job that’s only available on manual trigger using `workflow_dispatch`. This will give you a safe, gated way to destroy infrastructure on demand—perfect for cleanup or testing purposes.
+
+---
+
+### 🔁 Here's how to update your workflow:
+
+At the top, under `on:`, extend the trigger like this:
+
+```yaml
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+```
+
+Then add this new job at the bottom of your workflow file:
+
+```yaml
+  teardown:
+    name: 🧹 Teardown EKS & VPC
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Configure AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: 🧹 Destroy EKS Cluster
+        run: |
+          cd eks-cluster
+          terraform init
+          terraform destroy -auto-approve
+
+      - name: 🌐 Destroy VPC
+        run: |
+          cd ../KubeNet
+          terraform init
+          terraform destroy -auto-approve
+```
+
+> This ensures both `eks-cluster` and `KubeNet` stacks are torn down cleanly—when you want, and only when you ask for it.
+
+Let me know if you'd like a confirmation prompt via environment variable or GitHub input form, or maybe turn this into a scheduled cleanup for ephemeral environments.

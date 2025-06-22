@@ -28,6 +28,10 @@ jobs:
 
       - name: 🧱 Init VPC
         run: terraform init
+      
+      - name: 🔎 Validate VPC
+        run: terraform validate
+
 
       - name: 📋 Plan VPC
         run: terraform plan -out=tfplan 
@@ -41,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: EKS
+        working-directory: eks-cluster
 
     steps:
       - uses: actions/checkout@v3
@@ -51,11 +55,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - uses: hashicorp/setup-terraform@v2
-      - name: 🧱 Init EKS
+      - name: 🧱 Init eks-cluster
         run: terraform init
-      - name: 📋 Plan EKS
+
+      - name: 🔎 Validate eks-cluster
+        run: terraform validate
+
+      - name: 📋 Plan eks-cluster
         run: terraform plan -out=tfplan 
-      - name: ✅ Apply EKS
+
+      - name: ✅ Apply eks-cluster
         run: terraform apply -auto-approve tfplan
 
   # deploy-app:
@@ -89,18 +98,60 @@ jobs:
 
       - name: 📡 Update kubeconfig
         run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-
+      
+      - name: 🔍 Verify kube context
+        run: kubectl config current-context
+    
+      - name: ✅ Confirm nodes are ready
+        run: kubectl get nodes --no-headers | grep -c ' Ready'
+      
       - name: 🚀 Apply Kubernetes manifests
         run: |
           kubectl apply -f web-deploy.yaml
           kubectl apply -f web-svc.yaml
 
+      - name: ✅ Verify Deployment
+        run: kubectl get deployment ghs-web -n coweb-ns
+
+      - name: ✅ Verify Service Exposure
+        run: kubectl get svc ghs-service -n coweb-ns
+
       - name: ✅ Verify rollout
         run: kubectl rollout status deployment/ghs-web -n coweb-ns
 
+  teardown:
+    name: 🧹 Teardown Infra (auto after delay)
+    needs: deploy-app
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏲️ Wait for 2 minutes
+        run: sleep 120
 
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
 
+      - name: 🔐 Configure AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
 
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: 🧹 Destroy EKS
+        run: |
+           cd eks-cluster
+           terraform init
+           terraform destroy -auto-approve
+
+      - name: 🌐 Destroy VPC
+        run: |
+          cd ../KubeNet
+          terraform init
+          terraform destroy -auto-approve
+# Uncomment the following section if you want to include a manual clean-up job
 
   # clean-up:
   #  name: 🧹 Clean Up All Resources
@@ -118,8 +169,8 @@ jobs:
 
   #   - uses: hashicorp/setup-terraform@v2
 
-  #   - name: ⏳ Wait 10 minutes before cleanup
-  #     run: sleep 600
+  #   - name: ⏳ Wait 5 minutes before cleanup
+  #     run: sleep 300
 
   #   - name: 🧱 Init Terraform
   #     run: terraform init
