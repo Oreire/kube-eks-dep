@@ -3,12 +3,12 @@ name: Deploy and Clean EKS Infrastructure
 on:
   push:
     branches: [main]
-  # workflow_dispatch:
-  #   inputs:
-  #     auto_destroy:
-  #       description: 'Destroy Infra? (true/false)'
-  #       required: true
-  #       default: 'false'
+  workflow_dispatch:
+    inputs:
+      auto_destroy:
+        description: 'Destroy Infra? (true/false)'
+        required: true
+        default: 'false'
         
 jobs:
   deploy-vpc:
@@ -147,7 +147,7 @@ jobs:
         run: kubectl rollout status deployment/ghs-web -n coweb-ns
 
   teardown-infra:
-    # if: github.event_name == 'workflow_dispatch' && github.event.inputs.auto_destroy == 'true'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.auto_destroy == 'true'
     name: 🧹 Teardown Infra (auto after delay)
     needs: deploy-app
     runs-on: ubuntu-latest
@@ -176,7 +176,7 @@ jobs:
 
       - name: 🌐 Destroy VPC
         run: |
-          cd ../KubeNet
+          cd KubeNet
           terraform init
           terraform destroy -auto-approve
 
