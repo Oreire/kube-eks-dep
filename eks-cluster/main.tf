@@ -40,7 +40,9 @@ resource "aws_eks_cluster" "this" {
   vpc_config {
     subnet_ids = [
       data.terraform_remote_state.vpc.outputs.public_subnet_1,
-      data.terraform_remote_state.vpc.outputs.public_subnet_2
+      data.terraform_remote_state.vpc.outputs.public_subnet_2,
+      data.terraform_remote_state.vpc.outputs.private_subnet_1,
+      data.terraform_remote_state.vpc.outputs.private_subnet_2
     ]
   }
 
@@ -79,7 +81,9 @@ resource "aws_eks_node_group" "this" {
 
   subnet_ids = [
     data.terraform_remote_state.vpc.outputs.public_subnet_1,
-    data.terraform_remote_state.vpc.outputs.public_subnet_2
+    data.terraform_remote_state.vpc.outputs.public_subnet_2,
+    data.terraform_remote_state.vpc.outputs.private_subnet_1,
+    data.terraform_remote_state.vpc.outputs.private_subnet_2
   ]
 
   scaling_config {
@@ -91,6 +95,12 @@ resource "aws_eks_node_group" "this" {
   instance_types = ["t3.small"]
   ami_type       = "AL2_x86_64"
   disk_size      = 20
+
+  labels = {
+    role       = "web-node"
+    environment = "dev"
+    zone-aware = "true"
+  }
 
   depends_on = [aws_iam_role_policy_attachment.eks_node_policies]
 }
