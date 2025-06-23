@@ -152,8 +152,8 @@ jobs:
     needs: deploy-app
     runs-on: ubuntu-latest
     steps:
-      - name: ⏲️ Wait for 2 minutes
-        run: sleep 120
+      - name: ⏲️ Wait for 1 minutes
+        run: sleep 60
 
       - name: ⬇️ Checkout Code
         uses: actions/checkout@v3
