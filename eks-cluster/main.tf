@@ -71,47 +71,6 @@ resource "aws_iam_role_policy_attachment" "eks_node_policies" {
   role       = aws_iam_role.eks_node.name
 }
 
-# 1️⃣ Attach this to the IAM role's inline or managed permissions
-# resource "aws_iam_role_policy" "eks_actions" {
-#   role = aws_iam_role.github_oidc_role.name
-#   policy = jsonencode({
-#     Version = "2012-10-17",
-#     Statement = [{
-#       Effect   = "Allow",
-#       Action   = [
-#         "eks:UpdateClusterConfig",
-#         "eks:DeleteCluster",
-#         "eks:DescribeCluster",
-#         "eks:DescribeNodegroup",
-#         "eks:DeleteNodegroup",
-#         "eks:ListNodegroups"
-#       ],
-#       Resource = "*"
-#     }]
-#   })
-# }
-
-# 2️⃣ Attach this as the trust policy
-resource "aws_iam_role" "github_oidc_role" {
-  name = "eks-teardown-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = {
-        Federated = "arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com"
-      },
-      Action = "sts:AssumeRoleWithWebIdentity",
-      Condition = {
-        StringEquals = {
-          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub" = "repo:Oreire/kube-eks-dep:*"
-        }
-      }
-    }]
-  })
-}
 
 # EKS Managed Node Group
 resource "aws_eks_node_group" "this" {
