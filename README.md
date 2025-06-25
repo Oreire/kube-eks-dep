@@ -66,7 +66,7 @@
 
 ## 🔗 Live Demo
 
-## LoadBalancer Endpoint for Web Application Access is available at:** `http://a112b036067094434803b3a363dee8fd-848965654.eu-west-2.elb.amazonaws.com`  _(Test URL subject to TTL teardown)_
+## LoadBalancer Endpoint for Web Application Access is available at:** ` http://aa2c3f8c5514e4d4e86316ff92273386-1005030420.eu-west-2.elb.amazonaws.com`  _(Test URL subject to TTL teardown)_
 
 
 Production-Grade Relevance
