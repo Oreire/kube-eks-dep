@@ -20,7 +20,7 @@
 
   - Kubernetes deployment using `kubectl`
 
-  - Optional teardown stage for ephemeral environments
+  - Teardown stage for ephemeral environments (Optional)
 
 
 
