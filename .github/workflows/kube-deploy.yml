@@ -152,8 +152,8 @@ jobs:
     needs: deploy-app
     runs-on: ubuntu-latest
     env:
-        CLUSTER_NAME: your-cluster-name
-        AWS_REGION: your-region
+        CLUSTER_NAME: laredo-cluster  # Update if different
+        AWS_REGION: eu-west-2
     steps:
       - name: ⏲️ Wait for 1 minutes
         run: sleep 60
