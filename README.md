@@ -104,3 +104,24 @@ Production-Grade Relevance
     - Harden public exposure with Ingress, WAF, and NetworkPolicies
     - Automate environment promotion via release tags
 
+
+jobs:
+  cleanup-k8s:
+    name: Cleanup Kubernetes Resources
+    runs-on: ubuntu-latest
+    needs: [deploy-app]
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Update kubeconfig for EKS
+        run: aws eks update-kubeconfig --name laredo-cluster --region eu-west-2
+
+      - name: Delete Kubernetes resources in coweb-ns
+        run: |
+          kubectl delete all --all -n coweb-ns || true
+          kubectl delete namespace coweb-ns || true
