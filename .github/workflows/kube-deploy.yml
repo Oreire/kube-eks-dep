@@ -151,10 +151,12 @@ jobs:
     name: 🧹 Teardown Infra (auto after delay)
     needs: deploy-app
     runs-on: ubuntu-latest
+    env:
+        CLUSTER_NAME: your-cluster-name
+        AWS_REGION: your-region
     steps:
       - name: ⏲️ Wait for 1 minutes
         run: sleep 60
-          
 
       - name: ⬇️ Checkout Code
         uses: actions/checkout@v3
