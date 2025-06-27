@@ -158,8 +158,8 @@ jobs:
       - name: ⏲️ Wait for 1 minute
         run: sleep 60
 
-      - name: ⬇️ Checkout Code
-        uses: actions/checkout@v3
+      # - name: ⬇️ Checkout Code
+      #   uses: actions/checkout@v3
 
       - name: 🔐 Configure AWS
         uses: aws-actions/configure-aws-credentials@v2
@@ -167,6 +167,8 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
 
       - name: 📡 Safe kubeconfig update
         uses: ./.github/actions/update-kubeconfig-safe
