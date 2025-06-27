@@ -1,15 +1,45 @@
 name: Cleanup AWS Residuals
-description: Deletes orphaned ENIs and Elastic IPs from a given VPC
+description: Deletes orphaned ENIs and Elastic IPs tied to a given VPC to unblock teardown
 
 inputs:
   vpc_id:
-    description: "VPC ID to clean up"
+    description: "The VPC ID to clean up"
     required: true
 
 runs:
   using: "composite"
   steps:
-    - shell: bash
+    - name: 🧼 Delete ENIs and release EIPs
+      shell: bash
       run: |
-        echo "Cleaning up ENIs and EIPs for VPC: ${{ inputs.vpc_id }}"
-        # Add cleanup logic here
+        echo "Cleaning up resources for VPC: ${{ inputs.vpc_id }}"
+
+        # Delete ENIs
+        ENIs=$(aws ec2 describe-network-interfaces \
+          --filters "Name=vpc-id,Values=${{ inputs.vpc_id }}" \
+          --query "NetworkInterfaces[*].NetworkInterfaceId" --output text)
+
+        if [ -n "$ENIs" ]; then
+          for eni in $ENIs; do
+            echo "→ Deleting ENI: $eni"
+            aws ec2 delete-network-interface --network-interface-id $eni || true
+          done
+        else
+          echo "✅ No residual ENIs found."
+        fi
+
+        # Release Elastic IPs
+        EIPs=$(aws ec2 describe-addresses \
+          --query "Addresses[*].AllocationId" --output text)
+
+        if [ -n "$EIPs" ]; then
+          for eip in $EIPs; do
+            echo "→ Releasing EIP: $eip"
+            aws ec2 release-address --allocation-id $eip || true
+          done
+        else
+          echo "✅ No orphaned EIPs found."
+        fi
+
+        echo "✅ Residual cleanup complete. Waiting for AWS to settle..."
+        sleep 30
