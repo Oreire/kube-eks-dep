@@ -1,0 +1,15 @@
+name: Cleanup AWS Residuals
+description: Deletes orphaned ENIs and Elastic IPs from a given VPC
+
+inputs:
+  vpc_id:
+    description: "VPC ID to clean up"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        echo "Cleaning up ENIs and EIPs for VPC: ${{ inputs.vpc_id }}"
+        # Add cleanup logic here
