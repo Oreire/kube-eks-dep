@@ -105,70 +105,49 @@ Production-Grade Relevance
     - Automate environment promotion via release tags
 
 
-jobs:
-  teardown-infra:
-    name: 🧹 Teardown Infra (auto after delay)
-    needs: deploy-app
-    runs-on: ubuntu-latest
-    env:
-      CLUSTER_NAME: laredo-cluster
-      AWS_REGION: eu-west-2
-    steps:
-      - name: ⏲️ Wait for 1 minute
-        run: sleep 60
+name: Cleanup AWS Residuals
 
-      - name: ⬇️ Checkout Code
-        uses: actions/checkout@v3
+description: Deletes orphaned ENIs and releases Elastic IPs to unblock VPC teardown
 
-      - name: 🔐 Configure AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+inputs:
+  vpc_id:
+    description: "VPC ID to clean up"
+    required: true
 
-      - name: 📡 Safe kubeconfig update
-        uses: ./.github/actions/update-kubeconfig-safe
-        with:
-          cluster_name: laredo-cluster
-          region: eu-west-2
+runs:
+  using: "composite"
+  steps:
+    - name: Cleanup ENIs and EIPs
+      shell: bash
+      run: |
+        echo "🧼 Cleaning up resources in VPC: ${{ inputs.vpc_id }}"
 
-      - name: 📦 Delete Kubernetes Resources
-        run: |
-          kubectl delete deploy/ghs-web -n coweb-ns || true
-          kubectl delete svc/ghs-service -n coweb-ns || true
-          kubectl delete namespace coweb-ns || true
+        # Delete ENIs tied to the VPC
+        ENIs=$(aws ec2 describe-network-interfaces \
+          --filters "Name=vpc-id,Values=${{ inputs.vpc_id }}" \
+          --query "NetworkInterfaces[*].NetworkInterfaceId" --output text)
 
-      - name: ⚙️ Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        if [ -n "$ENIs" ]; then
+          for eni in $ENIs; do
+            echo "Deleting ENI: $eni"
+            aws ec2 delete-network-interface --network-interface-id $eni || true
+          done
+        else
+          echo "No residual ENIs found."
+        fi
 
-      - name: 🧹 Destroy EKS
-        run: |
-          cd eks-cluster
-          terraform init
-          terraform destroy -auto-approve
+        # Release orphaned Elastic IPs
+        EIPs=$(aws ec2 describe-addresses \
+          --query "Addresses[*].AllocationId" --output text)
 
-      - name: 🧼 Cleanup AWS Residuals
-        run: |
-          echo "Checking for ENIs and EIPs in VPC..."
-          VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=laredo-vpc" \
-            --query "Vpcs[0].VpcId" --output text)
+        if [ -n "$EIPs" ]; then
+          for eip in $EIPs; do
+            echo "Releasing EIP: $eip"
+            aws ec2 release-address --allocation-id $eip || true
+          done
+        else
+          echo "No orphaned EIPs found."
+        fi
 
-          # Delete lingering ENIs
-          aws ec2 describe-network-interfaces \
-            --filters "Name=vpc-id,Values=$VPC_ID" \
-            --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text | \
-            xargs -r -I {} aws ec2 delete-network-interface --network-interface-id {}
-
-          # Release any orphaned Elastic IPs
-          aws ec2 describe-addresses --query 'Addresses[*].AllocationId' --output text | \
-            xargs -r -I {} aws ec2 release-address --allocation-id {}
-
-          echo "Residual cleanup complete. Pausing to let AWS catch up..."
-          sleep 30
-
-      - name: 🌐 Destroy VPC
-        run: |
-          cd KubeNet
-          terraform init
-          terraform destroy -auto-approve
+        echo "Cleanup complete. Waiting for AWS to propagate detachments..."
+        sleep 30

@@ -168,6 +168,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
 
+      - name: 📡 Safe kubeconfig update
+        uses: ./.github/actions/update-kubeconfig-safe
+        with:
+          cluster_name: laredo-cluster
+          region: eu-west-2
+
       - name: 📦 Delete Kubernetes Resources
         run: |
           kubectl delete deploy/ghs-web -n coweb-ns || true
@@ -184,64 +190,113 @@ jobs:
           terraform destroy -auto-approve
 
       - name: 🧼 Cleanup AWS Residuals
-        run: |
-          echo "Checking for ENIs and EIPs in VPC..."
-          VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=laredo-vpc" \
-            --query "Vpcs[0].VpcId" --output text)
-
-          # Delete lingering ENIs
-          aws ec2 describe-network-interfaces \
-            --filters "Name=vpc-id,Values=$VPC_ID" \
-            --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text | \
-            xargs -r -I {} aws ec2 delete-network-interface --network-interface-id {}
-
-          # Release any orphaned Elastic IPs
-          aws ec2 describe-addresses --query 'Addresses[*].AllocationId' --output text | \
-            xargs -r -I {} aws ec2 release-address --allocation-id {}
-
-          echo "Residual cleanup complete. Pausing to let AWS catch up..."
-          sleep 30
-
-      - name: 🌐 Destroy VPC
-        run: |
-          cd KubeNet
-          terraform init
-          terraform destroy -auto-approve
-
-      - name: ⏲️ Wait for 1 minute
-        run: sleep 60
-
-      - name: ⬇️ Checkout Code
-        uses: actions/checkout@v3
-
-      - name: 🔐 Configure AWS
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: ./.github/actions/aws-cleanup-residuals
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          vpc_id: vpc-053777b02af3df06d  # Update to reflect the correct environment-specific VPC ID
 
-      - name: 📡 Update kubeconfig
-        run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-
-      - name: 📦 Delete K8S Infra
-        run: |
-          kubectl delete deploy/ghs-web -n coweb-ns || true
-          kubectl delete svc/ghs-service -n coweb-ns || true
-          kubectl delete namespace coweb-ns || true
-
-      - name: ⚙️ Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: 🧹 Destroy EKS
-        run: |
-           cd eks-cluster
-           terraform init
-           terraform destroy -auto-approve
-      
       - name: 🌐 Destroy VPC
         run: |
           cd KubeNet
           terraform init
           terraform destroy -auto-approve
+     
+
+  # teardown-infra:
+  #   if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.auto_destroy == 'true' || github.event_name == 'push' }}
+  #   name: 🧹 Teardown Infra (auto after delay)
+  #   needs: deploy-app
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     CLUSTER_NAME: laredo-cluster
+  #     AWS_REGION: eu-west-2
+  #   steps:
+  #     - name: ⏲️ Wait for 1 minute
+  #       run: sleep 60
+
+  #     - name: ⬇️ Checkout Code
+  #       uses: actions/checkout@v3
+
+  #     - name: 🔐 Configure AWS
+  #       uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: eu-west-2
+
+  #     - name: 📦 Delete Kubernetes Resources
+  #       run: |
+  #         kubectl delete deploy/ghs-web -n coweb-ns || true
+  #         kubectl delete svc/ghs-service -n coweb-ns || true
+  #         kubectl delete namespace coweb-ns || true
+
+  #     - name: ⚙️ Setup Terraform
+  #       uses: hashicorp/setup-terraform@v2
+
+  #     - name: 🧹 Destroy EKS
+  #       run: |
+  #         cd eks-cluster
+  #         terraform init
+  #         terraform destroy -auto-approve
+
+  #     - name: 🧼 Cleanup AWS Residuals
+  #       run: |
+  #         echo "Checking for ENIs and EIPs in VPC..."
+  #         VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=laredo-vpc" \
+  #           --query "Vpcs[0].VpcId" --output text)
+
+  #         # Delete lingering ENIs
+  #         aws ec2 describe-network-interfaces \
+  #           --filters "Name=vpc-id,Values=$VPC_ID" \
+  #           --query 'NetworkInterfaces[*].NetworkInterfaceId' --output text | \
+  #           xargs -r -I {} aws ec2 delete-network-interface --network-interface-id {}
+
+  #         # Release any orphaned Elastic IPs
+  #         aws ec2 describe-addresses --query 'Addresses[*].AllocationId' --output text | \
+  #           xargs -r -I {} aws ec2 release-address --allocation-id {}
+
+  #         echo "Residual cleanup complete. Pausing to let AWS catch up..."
+  #         sleep 30
+
+  #     - name: 🌐 Destroy VPC
+  #       run: |
+  #         cd KubeNet
+  #         terraform init
+  #         terraform destroy -auto-approve
+
+  #     - name: ⏲️ Wait for 1 minute
+  #       run: sleep 60
+
+  #     - name: ⬇️ Checkout Code
+  #       uses: actions/checkout@v3
+
+  #     - name: 🔐 Configure AWS
+  #       uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: eu-west-2
+
+  #     - name: 📡 Update kubeconfig
+  #       run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+
+  #     - name: 📦 Delete K8S Infra
+  #       run: |
+  #         kubectl delete deploy/ghs-web -n coweb-ns || true
+  #         kubectl delete svc/ghs-service -n coweb-ns || true
+  #         kubectl delete namespace coweb-ns || true
+
+  #     - name: ⚙️ Setup Terraform
+  #       uses: hashicorp/setup-terraform@v2
+
+  #     - name: 🧹 Destroy EKS
+  #       run: |
+  #          cd eks-cluster
+  #          terraform init
+  #          terraform destroy -auto-approve
+      
+  #     - name: 🌐 Destroy VPC
+  #       run: |
+  #         cd KubeNet
+  #         terraform init
+  #         terraform destroy -auto-approve
 
