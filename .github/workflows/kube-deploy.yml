@@ -147,7 +147,7 @@ jobs:
         run: kubectl rollout status deployment/ghs-web -n coweb-ns
 
   teardown-infra:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.auto_destroy == 'true' || github.event_name == 'push' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.auto_destroy == 'true' }}
     name: 🧹 Teardown Infra (auto after delay)
     needs: deploy-app
     runs-on: ubuntu-latest
