@@ -183,10 +183,10 @@ jobs:
           terraform init
           terraform destroy -auto-approve
 
-      - name: 🧼 Cleanup AWS Residuals
-        uses: ./.github/actions/aws-cleanup-residuals
-        with:
-          vpc_id: vpc-053777b02af3df06d  # Update to reflect the correct environment-specific VPC ID
+      # - name: 🧼 Cleanup AWS Residuals
+      #   uses: ./.github/actions/aws-cleanup-residuals
+      #   with:
+      #     vpc_id: vpc-053777b02af3df06d  # Update to reflect the correct environment-specific VPC ID
 
       - name: 🌐 Destroy VPC
         run: |
