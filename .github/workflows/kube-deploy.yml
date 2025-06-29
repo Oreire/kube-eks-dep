@@ -207,6 +207,7 @@ jobs:
       
       - name: 🧼 Cleanup AWS Residuals
         uses: ./.github/aws-cleanup-residuals
+        continue-on-error: true
         with:
           vpc_id: ${{ steps.get_vpc.outputs.vpc_id }}
 
