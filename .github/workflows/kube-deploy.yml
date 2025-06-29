@@ -146,6 +146,8 @@ jobs:
       - name: ✅ Verify rollout
         run: kubectl rollout status deployment/ghs-web -n coweb-ns
 
+  # optional cleanup job to remove orphaned resources
+      
   teardown-infra:
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.auto_destroy == 'true' }}
     name: 🧹 Teardown Infra (auto after delay)
@@ -183,10 +185,18 @@ jobs:
           terraform init
           terraform destroy -auto-approve
 
-      # - name: 🧼 Cleanup AWS Residuals
-      #   uses: ./.github/actions/aws-cleanup-residuals
-      #   with:
-      #     vpc_id: vpc-053777b02af3df06d  # Update to reflect the correct environment-specific VPC ID
+      - name: 📤 Extract VPC ID
+        id: get_vpc
+        run: |
+          cd KubeNet
+          terraform init
+          terraform output -raw vpc_id > vpc_id.txt
+          echo "vpc_id=$(cat vpc_id.txt)" >> $GITHUB_OUTPUT
+
+      - name: 🧼 Cleanup AWS Residuals
+        uses: ./.github/aws-cleanup-residuals
+        with:
+          vpc_id: ${{ steps.get_vpc.outputs.vpc_id }}
 
       - name: 🌐 Destroy VPC
         run: |
