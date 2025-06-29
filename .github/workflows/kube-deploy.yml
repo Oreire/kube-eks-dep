@@ -13,13 +13,7 @@ on:
         description: 'EKS cluster name'
         required: false
         default: 'laredo-cluster'
-  # Uncomment the following lines to enable manual trigger with auto-destroy option
-  #  workflow_dispatch:
-  #   inputs:
-  #     auto_destroy:
-  #       description: 'Destroy Infra? (true/false)'
-  #       required: true
-  #       default: 'false'
+  
         
 jobs:
   deploy-vpc:
