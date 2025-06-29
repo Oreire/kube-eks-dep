@@ -1,5 +1,5 @@
 name: Cleanup AWS Residuals
-description: Deletes orphaned ENIs and Elastic IPs tied to a given VPC to unblock teardown
+description: Deletes orphaned ENIs, releases Elastic IPs, and detaches Internet Gateways from a given VPC
 
 inputs:
   vpc_id:
@@ -39,6 +39,20 @@ runs:
           done
         else
           echo "✅ No orphaned EIPs found."
+        fi
+
+        # Detach Internet Gateways
+        IGWS=$(aws ec2 describe-internet-gateways \
+          --filters "Name=attachment.vpc-id,Values=${{ inputs.vpc_id }}" \
+          --query "InternetGateways[*].InternetGatewayId" --output text)
+
+        if [ -n "$IGWS" ]; then
+          for igw in $IGWS; do
+            echo "→ Detaching IGW: $igw"
+            aws ec2 detach-internet-gateway --internet-gateway-id $igw --vpc-id ${{ inputs.vpc_id }} || true
+          done
+        else
+          echo "✅ No attached Internet Gateways found."
         fi
 
         echo "✅ Residual cleanup complete. Waiting for AWS to settle..."
