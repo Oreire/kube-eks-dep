@@ -9,6 +9,17 @@ on:
         description: 'Destroy Infra? (true/false)'
         required: true
         default: 'false'
+      cluster_name:
+        description: 'EKS cluster name'
+        required: false
+        default: 'laredo-cluster'
+  # Uncomment the following lines to enable manual trigger with auto-destroy option
+  #  workflow_dispatch:
+  #   inputs:
+  #     auto_destroy:
+  #       description: 'Destroy Infra? (true/false)'
+  #       required: true
+  #       default: 'false'
         
 jobs:
   deploy-vpc:
@@ -190,9 +201,10 @@ jobs:
         run: |
           cd KubeNet
           terraform init
-          terraform output -raw vpc_id > vpc_id.txt
-          echo "vpc_id=$(cat vpc_id.txt)" >> $GITHUB_OUTPUT
+          VPC_ID=$(terraform output -raw vpc_id)
+          echo "vpc_id=$VPC_ID" >> $GITHUB_OUTPUT
 
+      
       - name: 🧼 Cleanup AWS Residuals
         uses: ./.github/aws-cleanup-residuals
         with:
