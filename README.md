@@ -2,6 +2,19 @@
 
 # 🚀 Automated Deployment of Containerized Web Application on AWS EKS Using Terraform and GitHub Actions
 
+Overview:
+Implemented a secure, fully automated CI/CD pipeline for containerized applications on Amazon EKS using Terraform and GitHub Actions. The project automated provisioning and teardown of Kubernetes infrastructure through a modular, GitOps‑based workflow, enabling both ephemeral testing and long‑lived production environments. By combining Infrastructure as Code (IaC) with Kubernetes automation, the solution delivered scalable, repeatable, and declarative deployments. Key features included stateless CI pipelines, guarded teardown inputs, and infrastructure governance, ensuring security, observability, and operational efficiency.
+
+---
+
+Tools & Technologies
+
+• AWS EKS, IAM, S3 (remote state)
+• Terraform (IaC, modular workflows)
+• GitHub Actions (CI/CD automation, GitOps)
+• Kubernetes (container orchestration, declarative deployments)
+
+
 
 ## 📌 Project Overview
 
